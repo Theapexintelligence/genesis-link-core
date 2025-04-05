@@ -6,6 +6,10 @@ import Dashboard from "@/components/Dashboard";
 import Connections from "@/components/Connections";
 import Settings from "@/components/Settings";
 import Navbar from "@/components/Navbar";
+import WorkflowDesigner from "@/components/WorkflowDesigner";
+import StatusMonitor from "@/components/StatusMonitor";
+import ApiTester from "@/components/ApiTester";
+import TemplateLibrary from "@/components/TemplateLibrary";
 import { AdaptersProvider } from "@/contexts/AdaptersContext";
 
 const Index = () => {
@@ -26,9 +30,13 @@ const Index = () => {
           </Card>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-7 mb-8">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="connections">Connections</TabsTrigger>
+              <TabsTrigger value="status">Status</TabsTrigger>
+              <TabsTrigger value="workflows">Workflows</TabsTrigger>
+              <TabsTrigger value="api-tester">API Tester</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
             
@@ -38,6 +46,22 @@ const Index = () => {
             
             <TabsContent value="connections" className="mt-0">
               <Connections />
+            </TabsContent>
+            
+            <TabsContent value="status" className="mt-0">
+              <StatusMonitor />
+            </TabsContent>
+            
+            <TabsContent value="workflows" className="mt-0">
+              <WorkflowDesigner />
+            </TabsContent>
+            
+            <TabsContent value="api-tester" className="mt-0">
+              <ApiTester />
+            </TabsContent>
+            
+            <TabsContent value="templates" className="mt-0">
+              <TemplateLibrary />
             </TabsContent>
             
             <TabsContent value="settings" className="mt-0">
