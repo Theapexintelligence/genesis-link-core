@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BrainCircuit, Code, GitMerge, LayoutList, Workflow, Play, PauseCircle, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BrainCircuit, Code, GitMerge, LayoutList, Workflow, Play, PauseCircle, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
 interface Step {
@@ -23,6 +24,22 @@ interface ExecutionResult {
   status: "pending" | "running" | "completed" | "failed";
 }
 
+interface OllamaModel {
+  name: string;
+  size: string;
+  quantization: string;
+  family: string;
+}
+
+const OLLAMA_MODELS: OllamaModel[] = [
+  { name: "llama3", size: "8B", quantization: "Q4_0", family: "Meta" },
+  { name: "phi3", size: "3.8B", quantization: "Q4_0", family: "Microsoft" },
+  { name: "gemma", size: "7B", quantization: "Q4_0", family: "Google" },
+  { name: "mistral", size: "7B", quantization: "Q4_0", family: "Mistral AI" },
+  { name: "codellama", size: "7B", quantization: "Q4_0", family: "Meta" },
+  { name: "falcon", size: "7B", quantization: "Q4_0", family: "TII" },
+];
+
 const AIFramework = () => {
   const [goal, setGoal] = useState("");
   const [subgoals, setSubgoals] = useState("");
@@ -31,11 +48,13 @@ const AIFramework = () => {
   const [executing, setExecuting] = useState(false);
   const [executionResults, setExecutionResults] = useState<ExecutionResult[]>([]);
   const [openhandsUrl, setOpenhandsUrl] = useState("http://localhost:3000");
-  const [phi2Status, setPhi2Status] = useState<"disconnected" | "connecting" | "connected">("disconnected");
+  const [ollamaUrl, setOllamaUrl] = useState("http://localhost:11434");
+  const [ollamaStatus, setOllamaStatus] = useState<"disconnected" | "connecting" | "connected">("disconnected");
   const [openhandsStatus, setOpenhandsStatus] = useState<"disconnected" | "connecting" | "connected">("disconnected");
+  const [selectedModel, setSelectedModel] = useState("llama3");
 
-  const simulatePhiGenerate = (prompt: string): Promise<string> => {
-    // In a real implementation, this would call the Phi-2 model
+  const simulateOllamaGenerate = (prompt: string): Promise<string> => {
+    // In a real implementation, this would call the Ollama API
     return new Promise((resolve) => {
       setTimeout(() => {
         if (prompt.includes("Brainstorm approaches")) {
@@ -67,17 +86,38 @@ const AIFramework = () => {
     });
   };
 
-  const connectToPhi2 = async () => {
-    setPhi2Status("connecting");
+  const connectToOllama = async () => {
+    setOllamaStatus("connecting");
     try {
-      // Simulate connection to Phi-2
+      // In a real implementation, this would check if Ollama is available
+      // by making a GET request to the Ollama API
       await new Promise(resolve => setTimeout(resolve, 2000));
-      setPhi2Status("connected");
-      toast.success("Connected to Phi-2 model");
+      setOllamaStatus("connected");
+      toast.success(`Connected to Ollama (${selectedModel})`);
     } catch (error) {
-      setPhi2Status("disconnected");
-      toast.error("Failed to connect to Phi-2");
+      setOllamaStatus("disconnected");
+      toast.error("Failed to connect to Ollama");
     }
+  };
+
+  const downloadOllama = () => {
+    window.open("https://ollama.com/download", "_blank");
+    toast.info("Redirecting to Ollama download page");
+  };
+
+  const pullOllamaModel = () => {
+    if (ollamaStatus !== "connected") {
+      toast.error("Please connect to Ollama first");
+      return;
+    }
+
+    toast.loading(`Pulling ${selectedModel} model... This may take a while`, {
+      duration: 5000,
+    });
+
+    setTimeout(() => {
+      toast.success(`${selectedModel} model pulled successfully`);
+    }, 5000);
   };
 
   const connectToOpenHands = async () => {
@@ -121,8 +161,8 @@ const AIFramework = () => {
       return;
     }
 
-    if (phi2Status !== "connected") {
-      toast.error("Please connect to Phi-2 first");
+    if (ollamaStatus !== "connected") {
+      toast.error("Please connect to Ollama first");
       return;
     }
 
@@ -134,7 +174,7 @@ const AIFramework = () => {
       const prompt = `Brainstorm approaches for achieving: ${step.step}`;
       
       try {
-        const result = await simulatePhiGenerate(prompt);
+        const result = await simulateOllamaGenerate(prompt);
         updatedSteps[i] = {
           ...step,
           approaches: result.split("\n").filter(a => a.trim())
@@ -155,8 +195,8 @@ const AIFramework = () => {
       return;
     }
 
-    if (phi2Status !== "connected") {
-      toast.error("Please connect to Phi-2 first");
+    if (ollamaStatus !== "connected") {
+      toast.error("Please connect to Ollama first");
       return;
     }
 
@@ -171,7 +211,7 @@ const AIFramework = () => {
         const prompt = `Predict success probability for approach: ${approach}`;
         
         try {
-          const result = await simulatePhiGenerate(prompt);
+          const result = await simulateOllamaGenerate(prompt);
           const probText = result.split(":")[1]?.trim() || "0.5";
           predictions[approach] = { success_prob: parseFloat(probText) };
         } catch (error) {
@@ -262,32 +302,80 @@ const AIFramework = () => {
             Unified AI Framework
           </CardTitle>
           <CardDescription>
-            Combines Phi-2 for reasoning, UltraMeticulousPlanner for structured planning, and OpenHands for code execution
+            Combines Ollama for reasoning, UltraMeticulousPlanner for structured planning, and OpenHands for code execution
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Phi-2 Connection</CardTitle>
+                <CardTitle className="text-lg">Ollama Connection</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2">
-                  <div className={`h-3 w-3 rounded-full ${
-                    phi2Status === "connected" ? "bg-green-500" : 
-                    phi2Status === "connecting" ? "bg-yellow-500" : "bg-red-500"
-                  }`}></div>
-                  <span className="text-sm">Status: {phi2Status}</span>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-3 w-3 rounded-full ${
+                      ollamaStatus === "connected" ? "bg-green-500" : 
+                      ollamaStatus === "connecting" ? "bg-yellow-500" : "bg-red-500"
+                    }`}></div>
+                    <span className="text-sm">Status: {ollamaStatus}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      type="text" 
+                      value={ollamaUrl} 
+                      onChange={(e) => setOllamaUrl(e.target.value)} 
+                      placeholder="Ollama URL (default: http://localhost:11434)"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="model" className="text-sm mb-1 block">Select Model</Label>
+                    <Select value={selectedModel} onValueChange={setSelectedModel}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {OLLAMA_MODELS.map((model) => (
+                          <SelectItem key={model.name} value={model.name}>
+                            {model.name} ({model.size}, {model.family})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={connectToPhi2} 
-                  disabled={phi2Status === "connecting" || phi2Status === "connected"}
+              <CardFooter className="flex flex-col gap-2">
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  <Button 
+                    onClick={connectToOllama} 
+                    disabled={ollamaStatus === "connecting" || ollamaStatus === "connected"}
+                    className="w-full"
+                  >
+                    {ollamaStatus === "connecting" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {ollamaStatus === "connected" ? "Connected" : ollamaStatus === "connecting" ? "Connecting..." : "Connect"}
+                  </Button>
+                  
+                  <Button
+                    onClick={pullOllamaModel}
+                    variant="outline"
+                    className="w-full"
+                    disabled={ollamaStatus !== "connected"}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Pull Model
+                  </Button>
+                </div>
+                
+                <Button
+                  onClick={downloadOllama}
+                  variant="secondary"
                   className="w-full"
                 >
-                  {phi2Status === "connecting" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {phi2Status === "connected" ? "Connected" : phi2Status === "connecting" ? "Connecting..." : "Connect to Phi-2"}
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Ollama
                 </Button>
               </CardFooter>
             </Card>
@@ -310,7 +398,7 @@ const AIFramework = () => {
                       type="text" 
                       value={openhandsUrl} 
                       onChange={(e) => setOpenhandsUrl(e.target.value)} 
-                      placeholder="OpenHands URL"
+                      placeholder="OpenHands URL (default: http://localhost:3000)"
                     />
                   </div>
                 </div>
@@ -378,7 +466,7 @@ const AIFramework = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <Button 
                     onClick={generateChainOfThought} 
-                    disabled={executing || steps.length === 0 || phi2Status !== "connected"}
+                    disabled={executing || steps.length === 0 || ollamaStatus !== "connected"}
                     className="w-full"
                   >
                     {executing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <BrainCircuit className="h-4 w-4 mr-2" />}
@@ -386,7 +474,7 @@ const AIFramework = () => {
                   </Button>
                   <Button 
                     onClick={simulateOutcomes} 
-                    disabled={executing || steps.some(step => step.approaches.length === 0) || phi2Status !== "connected"}
+                    disabled={executing || steps.some(step => step.approaches.length === 0) || ollamaStatus !== "connected"}
                     className="w-full"
                   >
                     {executing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Workflow className="h-4 w-4 mr-2" />}
