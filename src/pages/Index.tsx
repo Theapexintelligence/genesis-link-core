@@ -11,6 +11,7 @@ import StatusMonitor from "@/components/StatusMonitor";
 import ApiTester from "@/components/ApiTester";
 import TemplateLibrary from "@/components/TemplateLibrary";
 import { AdaptersProvider } from "@/contexts/AdaptersContext";
+import AIFramework from "@/components/AIFramework";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -30,7 +31,7 @@ const Index = () => {
           </Card>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-7 mb-8">
+            <TabsList className="grid w-full grid-cols-8 mb-8">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="connections">Connections</TabsTrigger>
               <TabsTrigger value="status">Status</TabsTrigger>
@@ -38,6 +39,7 @@ const Index = () => {
               <TabsTrigger value="api-tester">API Tester</TabsTrigger>
               <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="ai-framework">AI Framework</TabsTrigger>
             </TabsList>
             
             <TabsContent value="dashboard" className="mt-0">
@@ -66,6 +68,10 @@ const Index = () => {
             
             <TabsContent value="settings" className="mt-0">
               <Settings />
+            </TabsContent>
+            
+            <TabsContent value="ai-framework" className="mt-0">
+              <AIFramework />
             </TabsContent>
           </Tabs>
         </main>
