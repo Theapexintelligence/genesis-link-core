@@ -17,6 +17,7 @@ import SketchPad from "@/components/SketchPad";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ErrorProvider, useError } from "@/contexts/ErrorContext";
 import IntelligentErrorMonitor from "@/components/IntelligentErrorMonitor";
+import SystemHealthDashboard from "@/components/SystemHealthDashboard";
 
 const TabContent = ({ activeTab }: { activeTab: string }) => {
   const { trackError, resolveError } = useError();
@@ -72,6 +73,10 @@ const TabContent = ({ activeTab }: { activeTab: string }) => {
       <TabsContent value="error-monitor" className="mt-0">
         {wrapWithErrorBoundary(<IntelligentErrorMonitor />, "ErrorMonitor")}
       </TabsContent>
+      
+      <TabsContent value="system-health" className="mt-0">
+        {wrapWithErrorBoundary(<SystemHealthDashboard />, "SystemHealthDashboard")}
+      </TabsContent>
     </>
   );
 };
@@ -98,7 +103,7 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-10 mb-8">
+              <TabsList className="grid w-full grid-cols-11 mb-8">
                 <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                 <TabsTrigger value="connections">Connections</TabsTrigger>
                 <TabsTrigger value="status">Status</TabsTrigger>
@@ -109,6 +114,7 @@ const Index = () => {
                 <TabsTrigger value="ai-framework">AI Framework</TabsTrigger>
                 <TabsTrigger value="code-agent">Code Agent</TabsTrigger>
                 <TabsTrigger value="error-monitor">Error Monitor</TabsTrigger>
+                <TabsTrigger value="system-health">System Health</TabsTrigger>
               </TabsList>
               
               <TabContent activeTab={activeTab} />
