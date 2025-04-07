@@ -18,6 +18,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { ErrorProvider, useError } from "@/contexts/ErrorContext";
 import IntelligentErrorMonitor from "@/components/IntelligentErrorMonitor";
 import SystemHealthDashboard from "@/components/SystemHealthDashboard";
+import McpServers from "@/components/McpServers";
 
 const TabContent = ({ activeTab }: { activeTab: string }) => {
   const { trackError, resolveError } = useError();
@@ -77,6 +78,10 @@ const TabContent = ({ activeTab }: { activeTab: string }) => {
       <TabsContent value="system-health" className="mt-0">
         {wrapWithErrorBoundary(<SystemHealthDashboard />, "SystemHealthDashboard")}
       </TabsContent>
+      
+      <TabsContent value="mcp-servers" className="mt-0">
+        {wrapWithErrorBoundary(<McpServers />, "McpServers")}
+      </TabsContent>
     </>
   );
 };
@@ -103,13 +108,14 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-11 mb-8">
+              <TabsList className="grid w-full grid-cols-12 mb-8">
                 <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                 <TabsTrigger value="connections">Connections</TabsTrigger>
                 <TabsTrigger value="status">Status</TabsTrigger>
                 <TabsTrigger value="workflows">Workflows</TabsTrigger>
                 <TabsTrigger value="api-tester">API Tester</TabsTrigger>
                 <TabsTrigger value="templates">Templates</TabsTrigger>
+                <TabsTrigger value="mcp-servers">MCP Servers</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
                 <TabsTrigger value="ai-framework">AI Framework</TabsTrigger>
                 <TabsTrigger value="code-agent">Code Agent</TabsTrigger>

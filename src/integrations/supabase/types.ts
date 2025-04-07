@@ -9,7 +9,207 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      adapters: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          id: string
+          last_used: string | null
+          name: string
+          params: Json | null
+          service: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          last_used?: string | null
+          name: string
+          params?: Json | null
+          service: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          last_used?: string | null
+          name?: string
+          params?: Json | null
+          service?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      api_tests: {
+        Row: {
+          body: Json | null
+          created_at: string | null
+          endpoint: string
+          expected_response: Json | null
+          headers: Json | null
+          id: string
+          last_response: Json | null
+          last_status: number | null
+          method: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          body?: Json | null
+          created_at?: string | null
+          endpoint: string
+          expected_response?: Json | null
+          headers?: Json | null
+          id?: string
+          last_response?: Json | null
+          last_status?: number | null
+          method: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          body?: Json | null
+          created_at?: string | null
+          endpoint?: string
+          expected_response?: Json | null
+          headers?: Json | null
+          id?: string
+          last_response?: Json | null
+          last_status?: number | null
+          method?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      error_logs: {
+        Row: {
+          component_name: string
+          count: number | null
+          first_occurred_at: string | null
+          id: string
+          is_resolved: boolean | null
+          last_occurred_at: string | null
+          message: string
+          stack_trace: string | null
+          suggested_fix: string | null
+        }
+        Insert: {
+          component_name: string
+          count?: number | null
+          first_occurred_at?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          last_occurred_at?: string | null
+          message: string
+          stack_trace?: string | null
+          suggested_fix?: string | null
+        }
+        Update: {
+          component_name?: string
+          count?: number | null
+          first_occurred_at?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          last_occurred_at?: string | null
+          message?: string
+          stack_trace?: string | null
+          suggested_fix?: string | null
+        }
+        Relationships: []
+      }
+      system_health: {
+        Row: {
+          id: string
+          metrics: Json
+          timestamp: string | null
+        }
+        Insert: {
+          id?: string
+          metrics: Json
+          timestamp?: string | null
+        }
+        Update: {
+          id?: string
+          metrics?: Json
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      templates: {
+        Row: {
+          category: string | null
+          complexity: string | null
+          configuration: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          services: string[]
+          template_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          complexity?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          services: string[]
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          complexity?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          services?: string[]
+          template_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      workflows: {
+        Row: {
+          active: boolean | null
+          connections: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          connections?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          connections?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
