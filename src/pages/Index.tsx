@@ -12,6 +12,8 @@ import ApiTester from "@/components/ApiTester";
 import TemplateLibrary from "@/components/TemplateLibrary";
 import { AdaptersProvider } from "@/contexts/AdaptersContext";
 import AIFramework from "@/components/AIFramework";
+import CodeAgent from "@/components/CodeAgent";
+import SketchPad from "@/components/SketchPad";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -31,7 +33,7 @@ const Index = () => {
           </Card>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-8 mb-8">
+            <TabsList className="grid w-full grid-cols-9 mb-8">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="connections">Connections</TabsTrigger>
               <TabsTrigger value="status">Status</TabsTrigger>
@@ -40,6 +42,7 @@ const Index = () => {
               <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
               <TabsTrigger value="ai-framework">AI Framework</TabsTrigger>
+              <TabsTrigger value="code-agent">Code Agent</TabsTrigger>
             </TabsList>
             
             <TabsContent value="dashboard" className="mt-0">
@@ -73,8 +76,15 @@ const Index = () => {
             <TabsContent value="ai-framework" className="mt-0">
               <AIFramework />
             </TabsContent>
+            
+            <TabsContent value="code-agent" className="mt-0">
+              <CodeAgent />
+            </TabsContent>
           </Tabs>
         </main>
+        
+        {/* Sliding SketchPad that appears on every page */}
+        <SketchPad />
       </div>
     </AdaptersProvider>
   );
