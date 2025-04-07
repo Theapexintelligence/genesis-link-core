@@ -15,15 +15,78 @@ import AIFramework from "@/components/AIFramework";
 import CodeAgent from "@/components/CodeAgent";
 import SketchPad from "@/components/SketchPad";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { ErrorProvider, useError } from "@/contexts/ErrorContext";
+import IntelligentErrorMonitor from "@/components/IntelligentErrorMonitor";
+
+const TabContent = ({ activeTab }: { activeTab: string }) => {
+  const { trackError, resolveError } = useError();
+  
+  const wrapWithErrorBoundary = (component: React.ReactNode, name: string) => (
+    <ErrorBoundary 
+      componentName={name}
+      onError={trackError}
+      onErrorResolved={resolveError}
+    >
+      {component}
+    </ErrorBoundary>
+  );
+  
+  return (
+    <>
+      <TabsContent value="dashboard" className="mt-0">
+        {wrapWithErrorBoundary(<Dashboard />, "Dashboard")}
+      </TabsContent>
+      
+      <TabsContent value="connections" className="mt-0">
+        {wrapWithErrorBoundary(<Connections />, "Connections")}
+      </TabsContent>
+      
+      <TabsContent value="status" className="mt-0">
+        {wrapWithErrorBoundary(<StatusMonitor />, "StatusMonitor")}
+      </TabsContent>
+      
+      <TabsContent value="workflows" className="mt-0">
+        {wrapWithErrorBoundary(<WorkflowDesigner />, "WorkflowDesigner")}
+      </TabsContent>
+      
+      <TabsContent value="api-tester" className="mt-0">
+        {wrapWithErrorBoundary(<ApiTester />, "ApiTester")}
+      </TabsContent>
+      
+      <TabsContent value="templates" className="mt-0">
+        {wrapWithErrorBoundary(<TemplateLibrary />, "TemplateLibrary")}
+      </TabsContent>
+      
+      <TabsContent value="settings" className="mt-0">
+        {wrapWithErrorBoundary(<Settings />, "Settings")}
+      </TabsContent>
+      
+      <TabsContent value="ai-framework" className="mt-0">
+        {wrapWithErrorBoundary(<AIFramework />, "AIFramework")}
+      </TabsContent>
+      
+      <TabsContent value="code-agent" className="mt-0">
+        {wrapWithErrorBoundary(<CodeAgent />, "CodeAgent")}
+      </TabsContent>
+      
+      <TabsContent value="error-monitor" className="mt-0">
+        {wrapWithErrorBoundary(<IntelligentErrorMonitor />, "ErrorMonitor")}
+      </TabsContent>
+    </>
+  );
+};
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   return (
     <AdaptersProvider>
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <ErrorBoundary>
-          <Navbar />
+      <ErrorProvider>
+        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+          <ErrorBoundary componentName="Navbar">
+            <Navbar />
+          </ErrorBoundary>
+          
           <main className="container mx-auto px-4 py-6">
             <Card className="border-none shadow-lg mb-6">
               <CardHeader className="pb-3">
@@ -35,7 +98,7 @@ const Index = () => {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-9 mb-8">
+              <TabsList className="grid w-full grid-cols-10 mb-8">
                 <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                 <TabsTrigger value="connections">Connections</TabsTrigger>
                 <TabsTrigger value="status">Status</TabsTrigger>
@@ -45,68 +108,17 @@ const Index = () => {
                 <TabsTrigger value="settings">Settings</TabsTrigger>
                 <TabsTrigger value="ai-framework">AI Framework</TabsTrigger>
                 <TabsTrigger value="code-agent">Code Agent</TabsTrigger>
+                <TabsTrigger value="error-monitor">Error Monitor</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="dashboard" className="mt-0">
-                <ErrorBoundary>
-                  <Dashboard />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="connections" className="mt-0">
-                <ErrorBoundary>
-                  <Connections />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="status" className="mt-0">
-                <ErrorBoundary>
-                  <StatusMonitor />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="workflows" className="mt-0">
-                <ErrorBoundary>
-                  <WorkflowDesigner />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="api-tester" className="mt-0">
-                <ErrorBoundary>
-                  <ApiTester />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="templates" className="mt-0">
-                <ErrorBoundary>
-                  <TemplateLibrary />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="settings" className="mt-0">
-                <ErrorBoundary>
-                  <Settings />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="ai-framework" className="mt-0">
-                <ErrorBoundary>
-                  <AIFramework />
-                </ErrorBoundary>
-              </TabsContent>
-              
-              <TabsContent value="code-agent" className="mt-0">
-                <ErrorBoundary>
-                  <CodeAgent />
-                </ErrorBoundary>
-              </TabsContent>
+              <TabContent activeTab={activeTab} />
             </Tabs>
           </main>
           
           {/* Sliding SketchPad that appears on every page */}
           <SketchPad />
-        </ErrorBoundary>
-      </div>
+        </div>
+      </ErrorProvider>
     </AdaptersProvider>
   );
 };
