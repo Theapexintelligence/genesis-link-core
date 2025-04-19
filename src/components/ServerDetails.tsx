@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,45 +6,14 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HardDrive, Cpu, Clock, Network, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { McpServer } from "@/types/mcp";
 
 interface ServerDetailsProps {
   serverId: string;
 }
 
-interface ServerDetail {
-  id: string;
-  name: string;
-  host: string;
-  port: number;
-  status: string;
-  active: boolean;
-  os: string;
-  version: string;
-  uptime: string;
-  last_check: string;
-  resources: {
-    cpu: number;
-    memory: number;
-    disk: number;
-    network_in: number;
-    network_out: number;
-  };
-  services: Array<{
-    name: string;
-    status: string;
-    port: number;
-  }>;
-  alerts: Array<{
-    id: string;
-    timestamp: string;
-    level: string;
-    message: string;
-    resolved: boolean;
-  }>;
-}
-
 const ServerDetails = ({ serverId }: ServerDetailsProps) => {
-  const [server, setServer] = useState<ServerDetail | null>(null);
+  const [server, setServer] = useState<McpServer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -56,36 +24,10 @@ const ServerDetails = ({ serverId }: ServerDetailsProps) => {
         .from('mcp_servers')
         .select('*')
         .eq('id', serverId)
-        .single() as { data: any; error: Error | null };
+        .single() as { data: McpServer | null; error: Error | null };
       
       if (error) throw error;
-      
-      // In a real app, you would fetch more detailed information here
-      // This is just mocking the data structure
-      if (data) {
-        const serverWithDetails: ServerDetail = {
-          ...data,
-          os: data.os || "Linux Ubuntu 22.04",
-          version: data.version || "5.15.0-76-generic",
-          uptime: data.uptime || "3 days, 7 hours",
-          services: data.services || [
-            { name: "nginx", status: "running", port: 80 },
-            { name: "postgresql", status: "running", port: 5432 },
-            { name: "redis", status: "running", port: 6379 }
-          ],
-          alerts: data.alerts || [
-            { id: "1", timestamp: "2025-04-05 14:32:17", level: "warning", message: "High CPU usage detected", resolved: false },
-            { id: "2", timestamp: "2025-04-05 10:15:42", level: "critical", message: "Disk space below 10%", resolved: true }
-          ],
-          resources: {
-            ...data.resources,
-            network_in: data.resources?.network_in || 2.5,
-            network_out: data.resources?.network_out || 1.8
-          }
-        };
-        
-        setServer(serverWithDetails);
-      }
+      setServer(data);
     } catch (error) {
       console.error("Error fetching server details:", error);
     } finally {
@@ -96,9 +38,7 @@ const ServerDetails = ({ serverId }: ServerDetailsProps) => {
   useEffect(() => {
     fetchServerDetails();
     
-    // In a real application, you might set up a real-time subscription here
-    const interval = setInterval(fetchServerDetails, 30000); // Refresh every 30 seconds
-    
+    const interval = setInterval(fetchServerDetails, 30000);
     return () => clearInterval(interval);
   }, [serverId]);
 

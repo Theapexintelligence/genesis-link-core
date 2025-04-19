@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,175 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, RefreshCw, Server, Trash2, Settings } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-
-interface McpServer {
-  id: string;
-  name: string;
-  host: string;
-  port: number;
-  active: boolean;
-  status: string;
-  last_check: string;
-  resources: {
-    cpu: number;
-    memory: number;
-    disk: number;
-  };
-  tags: string[];
-}
+import { useMcpServers } from "@/hooks/useMcpServers";
 
 const McpServers = () => {
-  const [servers, setServers] = useState<McpServer[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [newServer, setNewServer] = useState({ name: "", host: "", port: 22 });
-  const { toast } = useToast();
+  const { 
+    servers, 
+    isLoading, 
+    isRefreshing, 
+    refresh, 
+    toggleServerActive, 
+    deleteServer, 
+    addServer 
+  } = useMcpServers();
 
-  // Fetch servers from database
-  const fetchServers = async () => {
-    try {
-      // Using type casting to fix TypeScript errors with Supabase client
-      const { data, error } = await supabase
-        .from('mcp_servers')
-        .select('*')
-        .order('name') as { data: McpServer[] | null; error: Error | null };
-      
-      if (error) throw error;
-      setServers(data || []);
-    } catch (error) {
-      console.error("Error fetching servers:", error);
-      toast({
-        title: "Failed to load servers",
-        description: "Could not retrieve server list from the database",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+  const handleAddServer = async () => {
+    if (!newServer.name || !newServer.host) return;
+    
+    const success = await addServer(newServer);
+    if (success) {
+      setNewServer({ name: "", host: "", port: 22 });
     }
-  };
-
-  // Initial data fetch
-  useEffect(() => {
-    fetchServers();
-  }, []);
-
-  // Toggle server active state
-  const toggleServerActive = async (id: string) => {
-    const server = servers.find(s => s.id === id);
-    if (!server) return;
-
-    try {
-      const { error } = await supabase
-        .from('mcp_servers')
-        .update({ active: !server.active })
-        .eq('id', id) as { error: Error | null };
-      
-      if (error) throw error;
-      
-      // Update local state
-      setServers(servers.map(s => 
-        s.id === id ? { ...s, active: !s.active } : s
-      ));
-      
-      toast({
-        title: `Server ${!server.active ? "activated" : "deactivated"}`,
-        description: `${server.name} has been ${!server.active ? "activated" : "deactivated"}`,
-      });
-    } catch (error) {
-      console.error("Error toggling server:", error);
-      toast({
-        title: "Action failed",
-        description: "Could not update server status",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Delete server
-  const deleteServer = async (id: string) => {
-    const server = servers.find(s => s.id === id);
-    if (!server) return;
-
-    try {
-      const { error } = await supabase
-        .from('mcp_servers')
-        .delete()
-        .eq('id', id) as { error: Error | null };
-      
-      if (error) throw error;
-      
-      // Update local state
-      setServers(servers.filter(s => s.id !== id));
-      
-      toast({
-        title: "Server removed",
-        description: `${server.name} has been removed from monitoring`,
-      });
-    } catch (error) {
-      console.error("Error deleting server:", error);
-      toast({
-        title: "Action failed",
-        description: "Could not delete server",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Add new server
-  const addServer = async () => {
-    if (!newServer.name || !newServer.host) {
-      toast({
-        title: "Validation failed",
-        description: "Server name and host are required",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('mcp_servers')
-        .insert({
-          name: newServer.name,
-          host: newServer.host,
-          port: newServer.port,
-          active: true,
-          status: 'Pending',
-          resources: { cpu: 0, memory: 0, disk: 0 },
-          tags: []
-        })
-        .select() as { data: McpServer[] | null; error: Error | null };
-      
-      if (error) throw error;
-      
-      // Update local state
-      if (data) {
-        setServers([...servers, data[0]]);
-        // Reset form
-        setNewServer({ name: "", host: "", port: 22 });
-        
-        toast({
-          title: "Server added",
-          description: `${newServer.name} has been added for monitoring`,
-        });
-      }
-    } catch (error) {
-      console.error("Error adding server:", error);
-      toast({
-        title: "Action failed",
-        description: "Could not add new server",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Refresh server statuses
-  const refreshServerStatuses = () => {
-    setIsRefreshing(true);
-    fetchServers();
   };
 
   return (
@@ -183,7 +34,7 @@ const McpServers = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">MCP Server Management</h2>
         <Button 
-          onClick={refreshServerStatuses} 
+          onClick={refresh} 
           disabled={isRefreshing}
           variant="outline"
         >
@@ -224,7 +75,7 @@ const McpServers = () => {
               />
             </div>
             <div className="col-span-4">
-              <Button className="w-full" onClick={addServer}>
+              <Button className="w-full" onClick={handleAddServer}>
                 <Plus className="h-4 w-4 mr-2" /> Add Server
               </Button>
             </div>

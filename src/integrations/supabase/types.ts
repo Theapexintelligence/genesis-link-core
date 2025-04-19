@@ -123,6 +123,63 @@ export type Database = {
         }
         Relationships: []
       }
+      mcp_servers: {
+        Row: {
+          active: boolean | null
+          alerts: Json | null
+          created_at: string | null
+          host: string
+          id: string
+          last_check: string | null
+          name: string
+          os: string | null
+          port: number
+          resources: Json | null
+          services: Json | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string | null
+          uptime: string | null
+          version: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          alerts?: Json | null
+          created_at?: string | null
+          host: string
+          id?: string
+          last_check?: string | null
+          name: string
+          os?: string | null
+          port?: number
+          resources?: Json | null
+          services?: Json | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          uptime?: string | null
+          version?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          alerts?: Json | null
+          created_at?: string | null
+          host?: string
+          id?: string
+          last_check?: string | null
+          name?: string
+          os?: string | null
+          port?: number
+          resources?: Json | null
+          services?: Json | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          uptime?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
       system_health: {
         Row: {
           id: string
