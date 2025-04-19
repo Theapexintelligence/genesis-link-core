@@ -36,10 +36,11 @@ const McpServers = () => {
   // Fetch servers from database
   const fetchServers = async () => {
     try {
+      // Using type casting to fix TypeScript errors with Supabase client
       const { data, error } = await supabase
         .from('mcp_servers')
         .select('*')
-        .order('name');
+        .order('name') as { data: McpServer[] | null; error: Error | null };
       
       if (error) throw error;
       setServers(data || []);
@@ -70,7 +71,7 @@ const McpServers = () => {
       const { error } = await supabase
         .from('mcp_servers')
         .update({ active: !server.active })
-        .eq('id', id);
+        .eq('id', id) as { error: Error | null };
       
       if (error) throw error;
       
@@ -102,7 +103,7 @@ const McpServers = () => {
       const { error } = await supabase
         .from('mcp_servers')
         .delete()
-        .eq('id', id);
+        .eq('id', id) as { error: Error | null };
       
       if (error) throw error;
       
@@ -146,7 +147,7 @@ const McpServers = () => {
           resources: { cpu: 0, memory: 0, disk: 0 },
           tags: []
         })
-        .select();
+        .select() as { data: McpServer[] | null; error: Error | null };
       
       if (error) throw error;
       

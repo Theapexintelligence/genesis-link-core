@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HardDrive, Cpu, Memory, Clock, Network, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { HardDrive, Cpu, Clock, Network, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ServerDetailsProps {
@@ -56,34 +56,36 @@ const ServerDetails = ({ serverId }: ServerDetailsProps) => {
         .from('mcp_servers')
         .select('*')
         .eq('id', serverId)
-        .single();
+        .single() as { data: any; error: Error | null };
       
       if (error) throw error;
       
       // In a real app, you would fetch more detailed information here
       // This is just mocking the data structure
-      const serverWithDetails: ServerDetail = {
-        ...data,
-        os: data.os || "Linux Ubuntu 22.04",
-        version: data.version || "5.15.0-76-generic",
-        uptime: data.uptime || "3 days, 7 hours",
-        services: data.services || [
-          { name: "nginx", status: "running", port: 80 },
-          { name: "postgresql", status: "running", port: 5432 },
-          { name: "redis", status: "running", port: 6379 }
-        ],
-        alerts: data.alerts || [
-          { id: "1", timestamp: "2025-04-05 14:32:17", level: "warning", message: "High CPU usage detected", resolved: false },
-          { id: "2", timestamp: "2025-04-05 10:15:42", level: "critical", message: "Disk space below 10%", resolved: true }
-        ],
-        resources: {
-          ...data.resources,
-          network_in: data.resources?.network_in || 2.5,
-          network_out: data.resources?.network_out || 1.8
-        }
-      };
-      
-      setServer(serverWithDetails);
+      if (data) {
+        const serverWithDetails: ServerDetail = {
+          ...data,
+          os: data.os || "Linux Ubuntu 22.04",
+          version: data.version || "5.15.0-76-generic",
+          uptime: data.uptime || "3 days, 7 hours",
+          services: data.services || [
+            { name: "nginx", status: "running", port: 80 },
+            { name: "postgresql", status: "running", port: 5432 },
+            { name: "redis", status: "running", port: 6379 }
+          ],
+          alerts: data.alerts || [
+            { id: "1", timestamp: "2025-04-05 14:32:17", level: "warning", message: "High CPU usage detected", resolved: false },
+            { id: "2", timestamp: "2025-04-05 10:15:42", level: "critical", message: "Disk space below 10%", resolved: true }
+          ],
+          resources: {
+            ...data.resources,
+            network_in: data.resources?.network_in || 2.5,
+            network_out: data.resources?.network_out || 1.8
+          }
+        };
+        
+        setServer(serverWithDetails);
+      }
     } catch (error) {
       console.error("Error fetching server details:", error);
     } finally {
@@ -213,7 +215,7 @@ const ServerDetails = ({ serverId }: ServerDetailsProps) => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <Memory className="h-5 w-5 mr-2 text-primary" />
+                      <Cpu className="h-5 w-5 mr-2 text-primary" />
                       <span className="font-medium">Memory Usage</span>
                     </div>
                     <span className="font-mono">{server.resources.memory}%</span>
@@ -271,7 +273,7 @@ const ServerDetails = ({ serverId }: ServerDetailsProps) => {
                     <div key={alert.id} className="grid grid-cols-12 gap-4 p-3 items-center">
                       <div className="col-span-3 text-sm">{alert.timestamp}</div>
                       <div className="col-span-2">
-                        <Badge variant={alert.level === 'critical' ? 'destructive' : 'warning'}>
+                        <Badge variant={alert.level === 'critical' ? 'destructive' : 'secondary'}>
                           {alert.level}
                         </Badge>
                       </div>
