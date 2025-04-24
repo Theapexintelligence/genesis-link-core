@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
@@ -47,14 +46,11 @@ const SketchPad = () => {
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const touchRef = useRef<{ x: number, y: number } | null>(null);
 
-  // Save current state to history
   const saveToHistory = useCallback(() => {
     if (!canvasRef.current) return;
     
     const currentState = canvasRef.current.toDataURL("image/png");
     
-    // If we've gone back in history and draw something new,
-    // we need to remove all future states
     if (historyIndex >= 0 && historyIndex < history.length - 1) {
       setHistory(prevHistory => prevHistory.slice(0, historyIndex + 1).concat(currentState));
     } else {
@@ -64,7 +60,6 @@ const SketchPad = () => {
     setHistoryIndex(prev => prev + 1);
   }, [history, historyIndex]);
 
-  // Initialize the canvas and handle resize
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -72,16 +67,14 @@ const SketchPad = () => {
     const updateCanvasSize = () => {
       const container = canvas.parentElement;
       if (container) {
-        // Make canvas fill the entire container with some padding
         canvas.width = container.clientWidth * 2;
         canvas.height = container.clientHeight * 2;
         canvas.style.width = `${container.clientWidth}px`;
         canvas.style.height = `${container.clientHeight}px`;
 
-        // Set up canvas context
         const context = canvas.getContext("2d");
         if (context) {
-          context.scale(2, 2); // Scale for high DPI displays
+          context.scale(2, 2);
           context.lineCap = brushType === "square" ? "butt" : "round";
           context.lineJoin = "round";
           context.strokeStyle = BRUSH_COLORS.find(color => color.id === brushColor)?.value || "#000000";
@@ -99,20 +92,16 @@ const SketchPad = () => {
       }
     };
 
-    // Initial size setup
     updateCanvasSize();
 
-    // Draw grid if needed
     if (showGrid && contextRef.current) {
       drawGrid();
     }
 
-    // Handle window and container resize
     window.addEventListener("resize", updateCanvasSize);
     return () => window.removeEventListener("resize", updateCanvasSize);
   }, [brushColor, brushSize, brushType, showGrid]);
   
-  // Update context when brush properties change
   useEffect(() => {
     if (!contextRef.current) return;
     
@@ -128,15 +117,12 @@ const SketchPad = () => {
     }
   }, [brushColor, brushSize, brushType]);
   
-  // Handle history updates
   useEffect(() => {
-    // On first run, save the initial blank canvas
     if (history.length === 0 && canvasRef.current) {
       saveToHistory();
     }
   }, [history.length, saveToHistory]);
-
-  // Draw grid on canvas
+  
   const drawGrid = useCallback(() => {
     const canvas = canvasRef.current;
     const context = contextRef.current;
@@ -147,13 +133,11 @@ const SketchPad = () => {
     const width = canvas.width / 2;
     const height = canvas.height / 2;
     
-    // Save current context settings
     context.save();
     
     context.strokeStyle = "#ddd";
     context.lineWidth = 0.5;
     
-    // Draw vertical lines
     for (let x = 0; x <= width; x += gridSize) {
       context.beginPath();
       context.moveTo(x, 0);
@@ -161,7 +145,6 @@ const SketchPad = () => {
       context.stroke();
     }
     
-    // Draw horizontal lines
     for (let y = 0; y <= height; y += gridSize) {
       context.beginPath();
       context.moveTo(0, y);
@@ -169,7 +152,6 @@ const SketchPad = () => {
       context.stroke();
     }
     
-    // Restore context settings
     context.restore();
   }, []);
 
@@ -200,7 +182,6 @@ const SketchPad = () => {
     }
   };
   
-  // Touch support functions
   const handleTouchStart = (event: React.TouchEvent<HTMLCanvasElement>) => {
     event.preventDefault();
     const canvas = canvasRef.current;
@@ -251,7 +232,6 @@ const SketchPad = () => {
       saveToHistory();
       toast.success("Canvas cleared");
       
-      // Redraw grid if enabled
       if (showGrid) {
         drawGrid();
       }
@@ -273,20 +253,23 @@ const SketchPad = () => {
       canvas.toBlob(blob => {
         if (blob) {
           try {
-            const item = new ClipboardItem({ "image/png": blob });
-            navigator.clipboard.write([item]);
-            toast.success("Drawing copied to clipboard");
+            const item = new ClipboardItem({ 'image/png': blob });
+            navigator.clipboard.write([item]).then(() => {
+              toast.success("Drawing copied to clipboard");
+            }).catch(() => {
+              const imageUrl = canvas.toDataURL("image/png");
+              const tempLink = document.createElement("a");
+              tempLink.href = imageUrl;
+              tempLink.download = "sketch.png";
+              tempLink.click();
+              toast.success("Drawing downloaded (clipboard copy not supported in your browser)");
+            });
           } catch (err) {
-            // Fallback for browsers that don't support ClipboardItem
-            const imageUrl = canvas.toDataURL("image/png");
-            const tempLink = document.createElement("a");
-            tempLink.href = imageUrl;
-            tempLink.download = "sketch.png";
-            tempLink.click();
-            toast.success("Drawing downloaded (clipboard copy not supported in your browser)");
+            console.error("Error copying to clipboard:", err);
+            toast.error("Could not copy to clipboard");
           }
         }
-      });
+      }, 'image/png');
     }
   };
 
@@ -310,17 +293,7 @@ const SketchPad = () => {
       const img = new Image();
       img.src = history[newIndex];
       img.onload = () => {
-        const canvas = canvasRef.current;
-        const context = contextRef.current;
-        if (canvas && context) {
-          context.clearRect(0, 0, canvas.width / 2, canvas.height / 2);
-          context.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
-          
-          // Redraw grid if enabled
-          if (showGrid) {
-            drawGrid();
-          }
-        }
+        restoreCanvasState(img.src);
       };
     } else {
       toast.info("Nothing to undo");
@@ -335,17 +308,7 @@ const SketchPad = () => {
       const img = new Image();
       img.src = history[newIndex];
       img.onload = () => {
-        const canvas = canvasRef.current;
-        const context = contextRef.current;
-        if (canvas && context) {
-          context.clearRect(0, 0, canvas.width / 2, canvas.height / 2);
-          context.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
-          
-          // Redraw grid if enabled
-          if (showGrid) {
-            drawGrid();
-          }
-        }
+        restoreCanvasState(img.src);
       };
     } else {
       toast.info("Nothing to redo");
@@ -370,6 +333,23 @@ const SketchPad = () => {
   const toggleFullscreen = () => {
     setFullscreen(prev => !prev);
   };
+
+  const restoreCanvasState = useCallback((imageData: string) => {
+    const img = new Image();
+    img.src = imageData;
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      const context = contextRef.current;
+      if (canvas && context) {
+        context.clearRect(0, 0, canvas.width / 2, canvas.height / 2);
+        context.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
+        
+        if (showGrid) {
+          drawGrid();
+        }
+      }
+    };
+  }, [showGrid, drawGrid]);
 
   return (
     <div 
