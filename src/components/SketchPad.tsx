@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
@@ -31,62 +30,35 @@ const SketchPad = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Set canvas size
-    canvas.width = canvas.offsetWidth * 2;
-    canvas.height = canvas.offsetHeight * 2;
-    canvas.style.width = `${canvas.offsetWidth}px`;
-    canvas.style.height = `${canvas.offsetHeight}px`;
+    // Increase canvas size and make it more responsive
+    const updateCanvasSize = () => {
+      const container = canvas.parentElement;
+      if (container) {
+        // Make canvas fill the entire container with some padding
+        canvas.width = container.clientWidth * 2;
+        canvas.height = container.clientHeight * 2;
+        canvas.style.width = `${container.clientWidth}px`;
+        canvas.style.height = `${container.clientHeight}px`;
 
-    // Set up canvas context
-    const context = canvas.getContext("2d");
-    if (context) {
-      context.scale(2, 2); // Scale for high DPI displays
-      context.lineCap = "round";
-      context.lineJoin = "round";
-      context.strokeStyle = BRUSH_COLORS.find(color => color.id === brushColor)?.value || "#000000";
-      context.lineWidth = brushSize[0];
-      contextRef.current = context;
-    }
-
-    // Handle window resize
-    const handleResize = () => {
-      if (canvas && context) {
-        // Save current drawing
-        const tempCanvas = document.createElement("canvas");
-        const tempContext = tempCanvas.getContext("2d");
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        if (tempContext) {
-          tempContext.drawImage(canvas, 0, 0);
+        // Set up canvas context
+        const context = canvas.getContext("2d");
+        if (context) {
+          context.scale(2, 2); // Scale for high DPI displays
+          context.lineCap = "round";
+          context.lineJoin = "round";
+          context.strokeStyle = BRUSH_COLORS.find(color => color.id === brushColor)?.value || "#000000";
+          context.lineWidth = brushSize[0];
+          contextRef.current = context;
         }
-
-        // Resize
-        canvas.width = canvas.offsetWidth * 2;
-        canvas.height = canvas.offsetHeight * 2;
-        canvas.style.width = `${canvas.offsetWidth}px`;
-        canvas.style.height = `${canvas.offsetHeight}px`;
-
-        // Restore scale and settings
-        context.scale(2, 2);
-        context.lineCap = "round";
-        context.lineJoin = "round";
-        context.strokeStyle = BRUSH_COLORS.find(color => color.id === brushColor)?.value || "#000000";
-        context.lineWidth = brushSize[0];
-
-        // Restore drawing
-        context.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
       }
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    // Initial size setup
+    updateCanvasSize();
 
-  useEffect(() => {
-    if (contextRef.current) {
-      contextRef.current.strokeStyle = BRUSH_COLORS.find(color => color.id === brushColor)?.value || "#000000";
-      contextRef.current.lineWidth = brushSize[0];
-    }
+    // Handle window and container resize
+    window.addEventListener("resize", updateCanvasSize);
+    return () => window.removeEventListener("resize", updateCanvasSize);
   }, [brushColor, brushSize]);
 
   const startDrawing = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -169,7 +141,7 @@ const SketchPad = () => {
   };
 
   return (
-    <div className={`fixed right-0 top-1/4 bg-background border-l border-t border-b rounded-l-lg shadow-xl transition-all duration-300 z-10 ${isCollapsed ? 'w-12' : 'w-[450px]'}`}>
+    <div className={`fixed right-0 top-1/4 bg-background border-l border-t border-b rounded-l-lg shadow-xl transition-all duration-300 z-10 ${isCollapsed ? 'w-12' : 'w-[650px]'}`}>
       <div className="flex h-full">
         <Button 
           variant="ghost" 
@@ -250,14 +222,14 @@ const SketchPad = () => {
             </div>
           </div>
           
-          <div className="flex-1 border rounded-lg overflow-hidden bg-white">
+          <div className="flex-1 border rounded-lg overflow-hidden bg-white min-h-[500px]">
             <canvas
               ref={canvasRef}
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={stopDrawing}
               onMouseLeave={stopDrawing}
-              className="w-full h-[300px] cursor-crosshair touch-none"
+              className="w-full h-full cursor-crosshair touch-none"
             />
           </div>
           
