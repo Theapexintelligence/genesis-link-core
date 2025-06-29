@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { mcpServersApi } from '@/api/index';
 import type { McpServer } from '@/types/mcp';
 
 export const useMcpServers = () => {
@@ -12,12 +11,7 @@ export const useMcpServers = () => {
 
   const fetchServers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('mcp_servers')
-        .select('*')
-        .order('name') as { data: McpServer[] | null; error: Error | null };
-      
-      if (error) throw error;
+      const data = await mcpServersApi.getAll();
       setServers(data || []);
     } catch (error) {
       console.error("Error fetching servers:", error);
@@ -37,12 +31,7 @@ export const useMcpServers = () => {
     if (!server) return;
 
     try {
-      const { error } = await supabase
-        .from('mcp_servers')
-        .update({ active: !server.active })
-        .eq('id', id);
-      
-      if (error) throw error;
+      await mcpServersApi.update(id, { active: !server.active });
       
       setServers(servers.map(s => 
         s.id === id ? { ...s, active: !s.active } : s
@@ -67,12 +56,7 @@ export const useMcpServers = () => {
     if (!server) return;
 
     try {
-      const { error } = await supabase
-        .from('mcp_servers')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      await mcpServersApi.delete(id);
       
       setServers(servers.filter(s => s.id !== id));
       
@@ -92,23 +76,20 @@ export const useMcpServers = () => {
 
   const addServer = async (newServer: { name: string; host: string; port: number }) => {
     try {
-      const { data, error } = await supabase
-        .from('mcp_servers')
-        .insert({
-          name: newServer.name,
-          host: newServer.host,
-          port: newServer.port,
-          active: true,
-          status: 'Pending',
-          resources: { cpu: 0, memory: 0, disk: 0 },
-          tags: []
-        })
-        .select() as { data: McpServer[] | null; error: Error | null };
+      const serverData = {
+        name: newServer.name,
+        host: newServer.host,
+        port: newServer.port,
+        active: true,
+        status: 'Pending',
+        resources: { cpu: 0, memory: 0, disk: 0 },
+        tags: []
+      };
       
-      if (error) throw error;
+      const data = await mcpServersApi.create(serverData);
       
       if (data) {
-        setServers([...servers, data[0]]);
+        setServers([...servers, data]);
         toast({
           title: "Server added",
           description: `${newServer.name} has been added for monitoring`,
