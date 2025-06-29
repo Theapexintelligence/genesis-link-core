@@ -12,7 +12,7 @@ import { Play, Save, Code, Copy } from "lucide-react";
 const ApiTester = () => {
   const { adapters } = useAdapters();
   const { toast } = useToast();
-  const [selectedAdapter, setSelectedAdapter] = useState("");
+  const [selectedAdapter, setSelectedAdapter] = useState("none");
   const [endpoint, setEndpoint] = useState("");
   const [method, setMethod] = useState("GET");
   const [requestBody, setRequestBody] = useState("{\n  \n}");
@@ -160,7 +160,7 @@ const ApiTester = () => {
                   <SelectValue placeholder="Select a connection" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None (Direct Request)</SelectItem>
+                  <SelectItem value="none">None (Direct Request)</SelectItem>
                   {activeAdapters.map(adapter => (
                     <SelectItem key={adapter.id} value={adapter.id}>
                       {adapter.name}
