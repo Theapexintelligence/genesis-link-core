@@ -16,9 +16,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || 'https://znuwvmrftqoorgapbmgl.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpudXd2bXJmdHFvb3JnYXBibWdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM5OTM0ODUsImV4cCI6MjA1OTU2OTQ4NX0.uXxfCPVHEi2pEI7ywRErripIjfXegnOowGJzFWzPch8';
+// Initialize Supabase client - require environment variables
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing required environment variables: SUPABASE_URL and SUPABASE_KEY must be set');
+  process.exit(1);
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
@@ -46,6 +52,7 @@ app.get('/health', (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Genesis Link Core API running on port ${PORT}`);
+  console.log(`Supabase URL: ${supabaseUrl}`);
 });
 
 module.exports = app;
