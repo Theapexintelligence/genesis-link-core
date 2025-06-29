@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTheme } from "next-themes";
 import { MoonIcon, SunIcon, Menu, Bell, UserCircle, ChevronDown } from "lucide-react";
@@ -12,6 +11,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import GlobalConnectionIndicator from "@/components/GlobalConnectionIndicator";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
@@ -35,6 +35,9 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-3">
+          {/* Global Connection Indicator */}
+          <GlobalConnectionIndicator />
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">

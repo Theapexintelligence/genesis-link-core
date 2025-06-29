@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, RefreshCw, Server, Trash2, Settings } from "lucide-react";
+import { Plus, RefreshCw, Server, Trash2, Settings, Wifi, WifiOff, Database, Globe } from "lucide-react";
 import { useMcpServers } from "@/hooks/useMcpServers";
+import { useConnection } from "@/hooks/useConnection";
+import ConnectionStatus from "@/components/ConnectionStatus";
 
 const McpServers = () => {
   const [newServer, setNewServer] = useState({ name: "", host: "", port: 22 });
@@ -14,11 +16,16 @@ const McpServers = () => {
     servers, 
     isLoading, 
     isRefreshing, 
+    useOfflineMode,
     refresh, 
     toggleServerActive, 
     deleteServer, 
-    addServer 
+    addServer,
+    forceOnlineMode,
+    forceOfflineMode
   } = useMcpServers();
+  
+  const { isConnected } = useConnection('supabase');
 
   const handleAddServer = async () => {
     if (!newServer.name || !newServer.host) return;
@@ -33,15 +40,57 @@ const McpServers = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">MCP Server Management</h2>
-        <Button 
-          onClick={refresh} 
-          disabled={isRefreshing}
-          variant="outline"
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh All'}
-        </Button>
+        <div className="flex gap-2">
+          {useOfflineMode && (
+            <Button 
+              onClick={forceOnlineMode}
+              variant="outline"
+              className="text-blue-600"
+            >
+              <Database className="h-4 w-4 mr-2" />
+              Go Online
+            </Button>
+          )}
+          {!useOfflineMode && isConnected('supabase') && (
+            <Button 
+              onClick={forceOfflineMode}
+              variant="outline"
+              className="text-gray-600"
+            >
+              <Globe className="h-4 w-4 mr-2" />
+              Offline Mode
+            </Button>
+          )}
+          <Button 
+            onClick={refresh} 
+            disabled={isRefreshing}
+            variant="outline"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh All'}
+          </Button>
+        </div>
       </div>
+
+      {/* Connection Status Card */}
+      <ConnectionStatus />
+
+      {/* Mode Indicator */}
+      {useOfflineMode && (
+        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <WifiOff className="h-5 w-5 text-amber-600" />
+              <span className="font-medium text-amber-800 dark:text-amber-300">
+                Offline Mode Active
+              </span>
+              <span className="text-sm text-amber-700 dark:text-amber-400">
+                - Changes are saved locally only
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <Card>
         <CardHeader>
@@ -85,10 +134,27 @@ const McpServers = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>MCP Servers</CardTitle>
-          <CardDescription>
-            Manage and monitor all servers in your infrastructure
-          </CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>MCP Servers</CardTitle>
+              <CardDescription>
+                Manage and monitor all servers in your infrastructure
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {useOfflineMode ? (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+                  <Globe className="h-3 w-3 mr-1" />
+                  Offline
+                </Badge>
+              ) : (
+                <Badge variant="default" className="bg-green-100 text-green-800">
+                  <Wifi className="h-3 w-3 mr-1" />
+                  Online
+                </Badge>
+              )}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -115,6 +181,11 @@ const McpServers = () => {
                       <div className="flex items-center">
                         <Server className="h-4 w-4 mr-2 text-primary" />
                         {server.name}
+                        {useOfflineMode && server.id.startsWith('mock-') && (
+                          <Badge variant="outline" className="ml-2 text-xs">
+                            Mock
+                          </Badge>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
