@@ -3,11 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Zap, Rocket, Star, Heart, Crown, Gift, Music, 
-  Palette, Wand2, Sparkles, Rainbow, Sun, Moon,
-  Coffee, Pizza, Cat, Dog, Unicorn, Dragon
-} from 'lucide-react';
+import { Zap, Rocket, Star, Heart, Crown, Gift, Music, Palette, Wand2, Sparkles, Rainbow, Sun, Moon, Coffee, Pizza, Cat, Dog, Popcorn as Unicorn, Hexagon as Dragon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const InfiniteFeatures = () => {

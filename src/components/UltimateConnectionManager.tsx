@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useConnection } from '@/hooks/useConnection';
-import { 
-  Wifi, WifiOff, Database, Server, Globe, Zap, 
-  Heart, Star, Shield, Rocket, Crown, Magic
-} from 'lucide-react';
+import { Wifi, WifiOff, Database, Server, Globe, Zap, Heart, Star, Shield, Rocket, Crown, Magnet as Magic } from 'lucide-react';
 import { toast } from 'sonner';
 
 const UltimateConnectionManager = () => {
