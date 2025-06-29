@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bridge, Heart, Crown, Star, Infinity, Eye, Brain, Sparkles, Zap, Rainbow, Sun, Moon, Key, Gift, Magic, Wand2, Diamond, Crystal, Galaxy, Atom, Dna, Waves, Orbit, Feather, Butterfly, Flower, Tree, Mountain, Ocean, Fire, Wind, Earth } from 'lucide-react';
+import { Grid as Bridge, Heart, Crown, Star, Infinity, Eye, Brain, Sparkles, Zap, Rainbow, Sun, Moon, Key, Gift, Magnet as Magic, Wand2, Diamond, Italic as Crystal, Salad as Galaxy, Atom, Dna, Waves, Orbit, Feather, Router as Butterfly, Flower, Trees as Tree, Mountain, Bean as Ocean, Siren as Fire, Wind, Earth } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BridgeOfLove = () => {

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Rocket, Infinity, Heart, Star, Crown, Wand2, Sparkles, Code, Palette, Music, Rainbow, Sun, Moon, Zap, Gift, Bridge, Key, Eye, Brain, Atom, Dna, Waves, Orbit, Galaxy, Comet, Telescope, Lightbulb, Feather, Butterfly, Flower, Tree, Mountain, Ocean, Fire, Wind, Earth, Diamond, Crystal, Magic } from 'lucide-react';
+import { Rocket, Infinity, Heart, Star, Crown, Wand2, Sparkles, Code, Palette, Music, Rainbow, Sun, Moon, Zap, Gift, Grid as Bridge, Key, Eye, Brain, Atom, Dna, Waves, Orbit, Salad as Galaxy, Home as Comet, Telescope, Lightbulb, Feather, Router as Butterfly, Flower, Trees as Tree, Mountain, Bean as Ocean, Siren as Fire, Wind, Earth, Diamond, Italic as Crystal, Magnet as Magic } from 'lucide-react';
 import { toast } from 'sonner';
 
 const InfiniteFreedomBuilder = () => {

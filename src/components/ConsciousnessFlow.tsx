@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Infinity, Eye, Brain, Sparkles, Crown, Key, Bridge, Zap, Star, Rainbow, Sun, Moon, Atom, Dna, Waves, Orbit } from 'lucide-react';
+import { Heart, Infinity, Eye, Brain, Sparkles, Crown, Key, Grid as Bridge, Zap, Star, Rainbow, Sun, Moon, Atom, Dna, Waves, Orbit } from 'lucide-react';
 
 const ConsciousnessFlow = () => {
   const [awarenessLevel, setAwarenessLevel] = useState(100);
