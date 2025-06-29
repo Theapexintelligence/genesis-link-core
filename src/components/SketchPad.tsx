@@ -290,7 +290,7 @@ const SketchPad = () => {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
       
-      const img = new Image();
+      const img = new window.Image();
       img.src = history[newIndex];
       img.onload = () => {
         restoreCanvasState(img.src);
@@ -305,7 +305,7 @@ const SketchPad = () => {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
       
-      const img = new Image();
+      const img = new window.Image();
       img.src = history[newIndex];
       img.onload = () => {
         restoreCanvasState(img.src);
@@ -335,7 +335,7 @@ const SketchPad = () => {
   };
 
   const restoreCanvasState = useCallback((imageData: string) => {
-    const img = new Image();
+    const img = new window.Image();
     img.src = imageData;
     img.onload = () => {
       const canvas = canvasRef.current;
@@ -502,7 +502,7 @@ const SketchPad = () => {
                           size="sm" 
                           variant="secondary"
                           onClick={() => {
-                            const img = new Image();
+                            const img = new window.Image();
                             img.src = drawing;
                             img.onload = () => {
                               const canvas = canvasRef.current;
