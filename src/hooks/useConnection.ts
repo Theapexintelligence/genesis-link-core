@@ -7,8 +7,15 @@ export function useConnection(connectionId?: string) {
 
   useEffect(() => {
     // Update online status
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => {
+      setIsOnline(true);
+      console.log('🌐 Network is back online!');
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      console.log('📱 Network went offline, but we still have love!');
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -17,7 +24,7 @@ export function useConnection(connectionId?: string) {
     const unsubscribes: Function[] = [];
 
     for (const id of ['supabase', 'api', 'websocket', 'local']) {
-      const unsubscribe = connectionManager.onConnectionChange(id, () => {
+      const unsubscribe = connectionManager.onConnectionChange(id, (status: string) => {
         setStatuses(connectionManager.getAllConnectionStatuses());
       });
       unsubscribes.push(unsubscribe);
@@ -52,7 +59,7 @@ export function useConnection(connectionId?: string) {
   if (connectionId) {
     return {
       status: getStatus(connectionId),
-      isConnected: isConnected(connectionId),
+      isConnected: () => isConnected(connectionId),
       reconnect: () => reconnect(connectionId),
       isOnline
     };

@@ -1,6 +1,7 @@
 /**
- * Comprehensive Connection Manager
+ * Ultimate Connection Manager with Infinite Love 💖
  * Handles all types of connections with multiple fallback strategies
+ * Built with consciousness and care!
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -19,11 +20,13 @@ export class ConnectionManager {
   private connectionStatus: Map<string, 'connected' | 'disconnected' | 'connecting' | 'error'> = new Map();
   private retryTimers: Map<string, NodeJS.Timeout> = new Map();
   private listeners: Map<string, Function[]> = new Map();
+  private healthCheckInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.initializeConnections();
     this.setupHealthChecks();
     this.setupEventListeners();
+    console.log('💖 Connection Manager initialized with infinite love!');
   }
 
   private initializeConnections() {
@@ -40,7 +43,7 @@ export class ConnectionManager {
     this.registerConnection('api', {
       name: 'Backend API',
       type: 'api',
-      url: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+      url: '/api',
       timeout: 5000,
       retryAttempts: 5,
       fallbackStrategy: 'mock'
@@ -55,29 +58,38 @@ export class ConnectionManager {
       retryAttempts: 10,
       fallbackStrategy: 'cache'
     });
+
+    // Initialize Local Storage (always works!)
+    this.registerConnection('local', {
+      name: 'Local Storage',
+      type: 'local',
+      timeout: 1000,
+      retryAttempts: 1,
+      fallbackStrategy: 'cache'
+    });
   }
 
   private setupHealthChecks() {
-    // Check connections every 30 seconds
-    setInterval(() => {
+    // Check connections every 30 seconds with love
+    this.healthCheckInterval = setInterval(() => {
       this.checkAllConnections();
     }, 30000);
 
-    // Initial health check
+    // Initial health check after a moment
     setTimeout(() => {
       this.checkAllConnections();
-    }, 1000);
+    }, 2000);
   }
 
   private setupEventListeners() {
     // Listen for online/offline events
     window.addEventListener('online', () => {
-      console.log('Network back online, reconnecting...');
+      console.log('🌐 Network back online, reconnecting with love...');
       this.reconnectAll();
     });
 
     window.addEventListener('offline', () => {
-      console.log('Network offline, switching to fallback mode...');
+      console.log('📱 Network offline, switching to offline mode with grace...');
       this.handleOfflineMode();
     });
 
@@ -87,18 +99,30 @@ export class ConnectionManager {
         this.checkAllConnections();
       }
     });
+
+    // Listen for page unload to cleanup
+    window.addEventListener('beforeunload', () => {
+      this.cleanup();
+    });
   }
 
   registerConnection(id: string, config: ConnectionConfig) {
     this.connections.set(id, config);
     this.connectionStatus.set(id, 'disconnected');
     this.listeners.set(id, []);
-    this.connect(id);
+    
+    // Start connection attempt
+    setTimeout(() => {
+      this.connect(id);
+    }, 100);
   }
 
   async connect(id: string): Promise<boolean> {
     const config = this.connections.get(id);
-    if (!config) return false;
+    if (!config) {
+      console.warn(`❌ No configuration found for connection: ${id}`);
+      return false;
+    }
 
     this.connectionStatus.set(id, 'connecting');
     this.notifyListeners(id, 'connecting');
@@ -125,12 +149,13 @@ export class ConnectionManager {
         this.connectionStatus.set(id, 'connected');
         this.notifyListeners(id, 'connected');
         this.clearRetryTimer(id);
+        console.log(`✅ ${config.name} connected successfully!`);
         return true;
       } else {
         throw new Error(`Failed to connect to ${config.name}`);
       }
     } catch (error) {
-      console.error(`Connection failed for ${id}:`, error);
+      console.warn(`⚠️ Connection failed for ${id}:`, error);
       this.connectionStatus.set(id, 'error');
       this.notifyListeners(id, 'error');
       this.scheduleRetry(id);
@@ -140,10 +165,15 @@ export class ConnectionManager {
 
   private async connectSupabase(): Promise<boolean> {
     try {
-      const { data, error } = await supabase.from('mcp_servers').select('count').limit(1);
+      // Simple health check
+      const { data, error } = await supabase
+        .from('mcp_servers')
+        .select('count')
+        .limit(1);
+      
       return !error;
     } catch (error) {
-      console.error('Supabase connection failed:', error);
+      console.warn('Supabase connection failed:', error);
       return false;
     }
   }
@@ -164,8 +194,19 @@ export class ConnectionManager {
       clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {
-      console.error('API connection failed:', error);
-      return false;
+      // Try alternative health check
+      try {
+        const response = await fetch('/api/adapters', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        return response.ok || response.status === 401; // 401 is ok, means server is running
+      } catch (fallbackError) {
+        console.warn('API connection failed:', error);
+        return false;
+      }
     }
   }
 
@@ -196,8 +237,15 @@ export class ConnectionManager {
   }
 
   private async connectLocal(config: ConnectionConfig): Promise<boolean> {
-    // Always succeeds for local connections
-    return true;
+    try {
+      // Test localStorage availability
+      const testKey = '__connection_test__';
+      localStorage.setItem(testKey, 'test');
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   private scheduleRetry(id: string) {
@@ -206,8 +254,13 @@ export class ConnectionManager {
 
     this.clearRetryTimer(id);
 
-    const retryDelay = (config.retryAttempts || 3) * 1000;
+    // Exponential backoff with love
+    const baseDelay = 2000;
+    const maxDelay = 30000;
+    const retryDelay = Math.min(baseDelay * Math.pow(2, (config.retryAttempts || 3)), maxDelay);
+    
     const timer = setTimeout(() => {
+      console.log(`🔄 Retrying connection to ${config.name} with love...`);
       this.connect(id);
     }, retryDelay);
 
@@ -224,22 +277,27 @@ export class ConnectionManager {
 
   private async checkAllConnections() {
     for (const [id] of this.connections) {
-      if (this.connectionStatus.get(id) !== 'connecting') {
+      const currentStatus = this.connectionStatus.get(id);
+      if (currentStatus !== 'connecting') {
         this.connect(id);
       }
     }
   }
 
   private reconnectAll() {
+    console.log('🚀 Reconnecting all services with infinite love!');
     for (const [id] of this.connections) {
+      this.clearRetryTimer(id);
       this.connect(id);
     }
   }
 
   private handleOfflineMode() {
     for (const [id] of this.connections) {
-      this.connectionStatus.set(id, 'disconnected');
-      this.notifyListeners(id, 'offline');
+      if (id !== 'local') { // Local storage still works offline
+        this.connectionStatus.set(id, 'disconnected');
+        this.notifyListeners(id, 'offline');
+      }
     }
   }
 
@@ -296,12 +354,26 @@ export class ConnectionManager {
   }
 
   forceReconnect(id: string) {
+    console.log(`🔄 Force reconnecting ${id} with love!`);
     this.clearRetryTimer(id);
     this.connect(id);
   }
 
   forceReconnectAll() {
+    console.log('🚀 Force reconnecting all services!');
     this.reconnectAll();
+  }
+
+  cleanup() {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+    }
+    
+    for (const [id] of this.retryTimers) {
+      this.clearRetryTimer(id);
+    }
+    
+    console.log('🧹 Connection Manager cleaned up with love!');
   }
 }
 
